@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Transcription System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --gray: #6b7280;
+            --light: #f3f4f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1800px; margin: 0 auto; }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 { font-size: 24px; font-weight: 700; color: #1f2937; }
+        .subtitle { font-size: 14px; color: var(--gray); }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gray);
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        button, select {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:disabled {
+            background: var(--light);
+            color: var(--gray);
+            cursor: not-allowed;
+        }
+
+        button.danger { background: var(--danger); }
+
+        .preview {
+            background: #fffbea;
+            border: 2px dashed var(--warning);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .speaker-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .speaker-badge.doctor {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .speaker-badge.patient {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .preview-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .preview-label {
+            font-weight: 600;
+            color: var(--gray);
+            min-width: 80px;
+        }
+
+        .medical-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .med-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .med-card.vitals { border-color: var(--purple); }
+        .med-card.tests { border-color: var(--success); }
+        .med-card.medicines { border-color: var(--warning); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-count {
+            background: #1f2937;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .card-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .card-item {
+            padding: 8px 12px;
+            background: var(--light);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px 24px;
+            background: var(--light);
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 700;
+        }
+
+        .panel-body {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .conversation-entry {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .entry-text { line-height: 1.6; }
+
+        .footer {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer button { flex: 1; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        @media (max-width: 1200px) {
+            .controls { grid-template-columns: repeat(2, 1fr); }
+            .medical-cards { grid-template-columns: 1fr; }
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div class="logo">🏥</div>
+                    <div>
+                        <h1>Medical Transcription System</h1>
+                        <p class="subtitle">Real-time voice transcription with smart categorization</p>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="controls">
+                <select id="langSelect">
+                    <option value="ur-PK">Urdu (اردو)</option>
+                    <option value="en-US">English</option>
+                </select>
+                <button onclick="startSession()">▶ Start Session</button>
+                <button id="listenBtn" onclick="toggleListen()" disabled>🎤 Start Listening</button>
+                <button id="endBtn" onclick="endSession()" disabled class="danger">⏹ End Session</button>
+            </div>
+        </div>
+
+        <div class="preview">
+            <div class="preview-header">
+                <h3 style="font-size: 14px; color: var(--gray);">CURRENT SPEAKER</h3>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <span class="speaker-badge doctor" id="speakerBadge">Doctor</span>
+                    <button onclick="switchSpeaker()" style="padding: 6px 12px; font-size: 12px;">Switch</button>
+                </div>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Original:</span>
+                <span id="origText">Waiting for speech...</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">English:</span>
+                <span id="engText" style="color: var(--success); font-weight: 500;">Translation will appear here...</span>
+            </div>
+        </div>
+
+        <div class="medical-cards">
+            <div class="med-card vitals">
+                <div class="card-header">
+                    <span class="card-title" style="color: var(--purple);">❤️ Vitals</span>
+                    <div class="card-count" id="vitalsCount">0</div>
+                </div>
+                <div class="card-content" id="vitalsContent">
+                    <div class="empty-state" style="padding: 20px;">No vitals yet</div>
+                </div>
+            </div>
+
+            <div class="med-card tests">
+                <div class="card-header">
+                    <span class="card-title" style="color: var(--success);">🔬 Tests</span>
+                    <div class="card-count" id="testsCount">0</div>
+                </div>
+                <div class="card-content" id="testsContent">
+                    <div class="empty-state" style="padding: 20px;">No tests yet</div>
+                </div>
+            </div>
+
+            <div class="med-card medicines">
+                <div class="card-header">
+                    <span class="card-title" style="color: var(--warning);">💊 Medicines</span>
+                    <div class="card-count" id="medsCount">0</div>
+                </div>
+                <div class="card-content" id="medsContent">
+                    <div class="empty-state" style="padding: 20px;">No medicines yet</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">💬 Conversation Log</div>
+                <div class="panel-body" id="convLog">
+                    <div class="empty-state">Start speaking to see conversation</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📋 Summary</div>
+                <div class="panel-body" id="summary">
+                    <div class="empty-state">Summary will appear here</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card footer">
+            <button onclick="exportTXT()">📄 Export TXT</button>
+            <button onclick="exportJSON()">📊 Export JSON</button>
+            <button onclick="exportReport()" style="background: var(--success);">📋 Medical Report</button>
+        </div>
+    </div>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition, isListening = false, sessionActive = false;
+        let currentSpeaker = 'Doctor', currentOrig = '', currentEng = '';
+        let speechTimeout, cache = new Map();
+
+        let data = {
+            log: [],
+            vitals: new Map(),
+            tests: new Set(),
+            medicines: new Set(),
+            doctorNotes: '',
+            patientHistory: ''
+        };
+
+        const meds = ['paracetamol', 'panadol', 'aspirin', 'brufen', 'ibuprofen', 'amoxicillin', 'azithromycin'];
+        const tests = ['cbc', 'blood test', 'x-ray', 'xray', 'ultrasound', 'ecg', 'mri', 'ct scan'];
+        const vitals = [
+            { name: 'BP', pattern: /(?:bp|blood pressure)\s*:?\s*(\d{2,3})\s*[\/]\s*(\d{2,3})/gi, format: m => m[1] + '/' + m[2] + ' mmHg' },
+            { name: 'Temp', pattern: /(?:temp|temperature)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + '°F' },
+            { name: 'HR', pattern: /(?:hr|pulse|heart rate)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + ' bpm' },
+            { name: 'SpO2', pattern: /(?:spo2|oxygen)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + '%' }
+        ];
+
+        async function translate(text, lang) {
+            if (lang === 'en-US' || !text) return text;
+            if (cache.has(text)) return cache.get(text);
+            try {
+                const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + lang + '&tl=en&dt=t&q=' + encodeURIComponent(text);
+                const res = await fetch(url);
+                const json = await res.json();
+                let result = '';
+                if (json && json[0]) json[0].forEach(i => { if (i[0]) result += i[0]; });
+                cache.set(text, result);
+                return result;
+            } catch { return text; }
+        }
+
+        function initRecog() {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = document.getElementById('langSelect').value;
+
+            recognition.onresult = e => {
+                let interim = '', final = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+                    else interim += e.results[i][0].transcript;
+                }
+                if (interim) {
+                    document.getElementById('origText').textContent = currentOrig + interim;
+                    translateAndShow(currentOrig + interim);
+                }
+                if (final.trim()) {
+                    currentOrig += final;
+                    document.getElementById('origText').textContent = currentOrig;
+                    translateAndShow(currentOrig);
+                    clearTimeout(speechTimeout);
+                    speechTimeout = setTimeout(finalize, 2000);
+                }
+            };
+
+            recognition.onend = () => {
+                if (isListening && sessionActive) {
+                    try { recognition.start(); } catch (e) {}
+                }
+            };
+        }
+
+        async function translateAndShow(text) {
+            const lang = document.getElementById('langSelect').value.split('-')[0];
+            const eng = await translate(text, lang);
+            currentEng = eng;
+            document.getElementById('engText').textContent = eng;
+        }
+
+        async function finalize() {
+            if (!currentOrig.trim()) return;
+            await process(currentOrig.trim(), currentEng.trim());
+            currentOrig = '';
+            currentEng = '';
+            document.getElementById('origText').textContent = 'Waiting for speech...';
+            document.getElementById('engText').textContent = 'Translation will appear here...';
+        }
+
+        function startSession() {
+            sessionActive = true;
+            data = { log: [], vitals: new Map(), tests: new Set(), medicines: new Set(), doctorNotes: '', patientHistory: '' };
+            updateUI('active');
+            initRecog();
+            updateAll();
+        }
+
+        function toggleListen() {
+            if (!isListening) {
+                if (!recognition) initRecog();
+                try {
+                    recognition.start();
+                    isListening = true;
+                    updateUI('listening');
+                } catch (e) {}
+            } else {
+                clearTimeout(speechTimeout);
+                finalize();
+                recognition.stop();
+                isListening = false;
+                updateUI('active');
+            }
+        }
+
+        function endSession() {
+            if (isListening) toggleListen();
+            sessionActive = false;
+            updateUI('idle');
+        }
+
+        function switchSpeaker() {
+            finalize();
+            currentSpeaker = currentSpeaker === 'Doctor' ? 'Patient' : 'Doctor';
+            const badge = document.getElementById('speakerBadge');
+            badge.textContent = currentSpeaker;
+            badge.className = 'speaker-badge ' + currentSpeaker.toLowerCase();
+        }
+
+        function extractVitals(text) {
+            const found = new Map();
+            vitals.forEach(v => {
+                v.pattern.lastIndex = 0;
+                let m;
+                while ((m = v.pattern.exec(text)) !== null) {
+                    found.set(v.name, v.format(m));
+                }
+            });
+            return found;
+        }
+
+        function extractMeds(text) {
+            const found = new Set();
+            const lower = text.toLowerCase();
+            meds.forEach(m => {
+                if (lower.includes(m)) found.add(m.charAt(0).toUpperCase() + m.slice(1));
+            });
+            return found;
+        }
+
+        function extractTests(text) {
+            const found = new Set();
+            const lower = text.toLowerCase();
+            tests.forEach(t => {
+                if (lower.includes(t)) found.add(t.toUpperCase());
+            });
+            return found;
+        }
+
+        async function process(orig, eng) {
+            const entry = {
+                time: new Date().toLocaleTimeString(),
+                speaker: currentSpeaker,
+                orig: orig,
+                eng: eng
+            };
+
+            data.log.push(entry);
+            if (currentSpeaker === 'Doctor') data.doctorNotes += eng + ' ';
+            else data.patientHistory += eng + ' ';
+
+            const v = extractVitals(eng);
+            v.forEach((val, key) => data.vitals.set(key, val));
+
+            extractMeds(orig + ' ' + eng).forEach(m => data.medicines.add(m));
+            extractTests(orig + ' ' + eng).forEach(t => data.tests.add(t));
+
+            updateAll();
+        }
+
+        function updateAll() {
+            updateConv();
+            updateVitals();
+            updateTests();
+            updateMeds();
+            updateSummary();
+            updateCounts();
+        }
+
+        function updateConv() {
+            const log = document.getElementById('convLog');
+            log.innerHTML = '';
+            data.log.forEach(e => {
+                const div = document.createElement('div');
+                div.className = 'conversation-entry';
+                div.innerHTML = '<div class="entry-header"><strong>' + e.speaker + '</strong><span style="color: var(--gray); font-size: 12px;">' + e.time + '</span></div><div class="entry-text">' + e.eng + '</div>';
+                log.appendChild(div);
+            });
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateVitals() {
+            const cont = document.getElementById('vitalsContent');
+            if (data.vitals.size === 0) return;
+            cont.innerHTML = '';
+            data.vitals.forEach((val, key) => {
+                const div = document.createElement('div');
+                div.className = 'card-item';
+                div.innerHTML = '<span>' + key + '</span><strong style="color: var(--purple);">' + val + '</strong>';
+                cont.appendChild(div);
+            });
+        }
+
+        function updateTests() {
+            const cont = document.getElementById('testsContent');
+            if (data.tests.size === 0) return;
+            cont.innerHTML = '';
+            data.tests.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'card-item';
+                div.textContent = '🔬 ' + t;
+                cont.appendChild(div);
+            });
+        }
+
+        function updateMeds() {
+            const cont = document.getElementById('medsContent');
+            if (data.medicines.size === 0) return;
+            cont.innerHTML = '';
+            data.medicines.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'card-item';
+                div.textContent = '💊 ' + m;
+                cont.appendChild(div);
+            });
+        }
+
+        function updateSummary() {
+            const sum = document.getElementById('summary');
+            let html = '<div style="padding: 10px;">';
+            
+            if (data.vitals.size > 0) {
+                html += '<h4 style="color: var(--purple); margin-bottom: 10px;">❤️ Vitals</h4>';
+                data.vitals.forEach((v, k) => html += '<div style="margin-bottom: 8px;"><strong>' + k + ':</strong> ' + v + '</div>');
+            }
+
+            if (data.patientHistory) {
+                html += '<h4 style="color: var(--primary); margin: 16px 0 10px;">📝 Patient</h4><p style="font-size: 13px;">' + data.patientHistory + '</p>';
+            }
+
+            if (data.doctorNotes) {
+                html += '<h4 style="color: var(--success); margin: 16px 0 10px;">👨‍⚕️ Doctor</h4><p style="font-size: 13px;">' + data.doctorNotes + '</p>';
+            }
+
+            html += '</div>';
+            sum.innerHTML = html;
+        }
+
+        function updateCounts() {
+            document.getElementById('vitalsCount').textContent = data.vitals.size;
+            document.getElementById('testsCount').textContent = data.tests.size;
+            document.getElementById('medsCount').textContent = data.medicines.size;
+        }
+
+        function updateUI(state) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const listenBtn = document.getElementById('listenBtn');
+            const endBtn = document.getElementById('endBtn');
+
+            if (state === 'idle') {
+                dot.classList.remove('active');
+                text.textContent = 'Ready';
+                listenBtn.disabled = true;
+                endBtn.disabled = true;
+            } else if (state === 'active') {
+                dot.classList.add('active');
+                text.textContent = 'Session Active';
+                listenBtn.disabled = false;
+                listenBtn.textContent = '🎤 Start Listening';
+                endBtn.disabled = false;
+            } else if (state === 'listening') {
+                text.textContent = 'Recording...';
+                listenBtn.textContent = '⏸ Stop Listening';
+            }
+        }
+
+        function exportTXT() {
+            let txt = 'MEDICAL TRANSCRIPTION\\n\\n';
+            if (data.vitals.size > 0) {
+                txt += 'VITALS:\\n';
+                data.vitals.forEach((v, k) => txt += k + ': ' + v + '\\n');
+                txt += '\\n';
+            }
+            txt += 'PATIENT: ' + data.patientHistory + '\\n\\n';
+            txt += 'DOCTOR: ' + data.doctorNotes + '\\n\\n';
+            txt += 'TESTS: ' + Array.from(data.tests).join(', ') + '\\n\\n';
+            txt += 'MEDICINES: ' + Array.from(data.medicines).join(', ') + '\\n';
+            download(txt, 'text/plain', 'transcription.txt');
+        }
+
+        function exportJSON() {
+            const json = {
+                vitals: Object.fromEntries(data.vitals),
+                patient: data.patientHistory,
+                doctor: data.doctorNotes,
+                tests: Array.from(data.tests),
+                medicines: Array.from(data.medicines),
+                log: data.log
+            };
+            download(JSON.stringify(json, null, 2), 'application/json', 'transcription.json');
+        }
+
+        function exportReport() {
+            let txt = 'MEDICAL CONSULTATION REPORT\\n\\n';
+            txt += 'Date: ' + new Date().toLocaleDateString() + '\\n\\n';
+            if (data.vitals.size > 0) {
+                txt += '❤️ VITAL SIGNS:\\n';
+                data.vitals.forEach((v, k) => txt += '   ' + k + ': ' + v + '\\n');
+                txt += '\\n';
+            }
+            txt += '📋 PATIENT COMPLAINT:\\n   ' + data.patientHistory + '\\n\\n';
+            txt += '👨‍⚕️ DOCTOR NOTES:\\n   ' + data.doctorNotes + '\\n\\n';
+            txt += '🔬 TESTS ORDERED:\\n';
+            data.tests.forEach(t => txt += '   • ' + t + '\\n');
+            txt += '\\n💊 MEDICATIONS:\\n';
+            data.medicines.forEach(m => txt += '   • ' + m + '\\n');
+            download(txt, 'text/plain', 'medical_report.txt');
+        }
+
+        function download(content, type, name) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        updateUI('idle');
+    </script>
+</body>
+</html>
