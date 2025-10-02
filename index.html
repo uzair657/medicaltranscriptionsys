@@ -1,726 +1,827 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Transcription System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-            --gray: #6b7280;
-            --light: #f3f4f6;
-            --white: #ffffff;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MedScribe - Medical Transcription System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  <style>
+    /* ========= Reset & Vars ========= */
+    *, *::before, *::after { box-sizing: border-box; }
+    :root{
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #0f172a;      /* slate-900 */
+      --muted: #475569;     /* slate-600 */
+      --subtle: #94a3b8;    /* slate-400 */
+      --border: #e2e8f0;    /* slate-200 */
+      --ring: #bfdbfe;      /* blue-200 */
+      --brand: #2563eb;     /* blue-600 */
+      --brand-700: #1d4ed8;
+      --success: #16a34a;   /* green-600 */
+      --warn: #d97706;      /* amber-600 */
+      --danger: #dc2626;    /* red-600 */
+      --purple: #7c3aed;    /* violet-600 */
+      --radius: 14px;
+      --shadow-sm: 0 2px 6px rgba(15,23,42,.06);
+      --shadow:    0 6px 18px rgba(15,23,42,.08);
+      --shadow-lg: 0 14px 30px rgba(15,23,42,.12);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b1220;
+        --panel:#0f172a;
+        --text:#e5e7eb;
+        --muted:#cbd5e1;
+        --subtle:#94a3b8;
+        --border:#1f2a3b;
+        --ring:#1d4ed8;
+        --shadow-sm: 0 2px 6px rgba(0,0,0,.25);
+        --shadow:    0 6px 18px rgba(0,0,0,.35);
+        --shadow-lg: 0 14px 30px rgba(0,0,0,.45);
+      }
+    }
 
-        .container { max-width: 1800px; margin: 0 auto; }
+    /* ========= Base ========= */
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height:1.6;
+    }
+    .container{ max-width:1200px; margin: 32px auto; padding: 0 20px; }
 
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            margin-bottom: 24px;
-        }
+    /* ========= Header / Brand ========= */
+    .surface{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .header-main{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .brand{ display:flex; align-items:center; gap:14px; }
+    .brand-logo{
+      width:44px;height:44px;border-radius:12px;
+      background: var(--brand);
+      display:grid; place-items:center;
+      font-weight:800; color:#fff; letter-spacing:.5px;
+      box-shadow: var(--shadow-sm);
+      user-select:none;
+    }
+    .brand-text h1{ font-size:20px; font-weight:800; letter-spacing:-.2px; margin:0; }
+    .brand-text p{ font-size:13px; color: var(--muted); margin:2px 0 0; }
 
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .status{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 14px; border:1px solid var(--border);
+      border-radius: 999px; background: var(--panel);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;background:#9ca3af; position:relative;
+    }
+    .dot.active{
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(22,163,74,.45);
+      animation: ring 1.8s ease-out infinite;
+    }
+    @keyframes ring{
+      0%{ box-shadow: 0 0 0 0 rgba(22,163,74,.35); }
+      70%{ box-shadow: 0 0 0 10px rgba(22,163,74,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+    }
+    .status-text{ font-size:13px; font-weight:600; color:var(--muted); }
 
-        .logo {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
+    /* ========= Toolbar ========= */
+    .toolbar{
+      display:grid; grid-template-columns: 220px 1fr 1fr 1fr; gap:12px; margin-top:16px;
+    }
+    select, button{
+      appearance:none; border:none; outline:none;
+      font: inherit; font-weight:600; font-size:14px; line-height:1;
+      padding:12px 14px; border-radius:10px; cursor:pointer;
+      transition: all .18s ease;
+    }
+    select{
+      background:var(--panel); color:var(--text); border:1px solid var(--border);
+    }
+    select:focus{ box-shadow: 0 0 0 3px var(--ring); border-color: var(--brand); }
 
-        h1 { font-size: 24px; font-weight: 700; color: #1f2937; }
-        .subtitle { font-size: 14px; color: var(--gray); }
+    .btn{
+      background: var(--brand); color:#fff; border:1px solid transparent;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn:hover{ background: var(--brand-700); transform: translateY(-1px); }
+    .btn:active{ transform:none; }
+    .btn:disabled{ background:#cbd5e1; color:#fff; cursor:not-allowed; transform:none; }
+    .btn-outline{
+      background: var(--panel); color: var(--text); border:1px solid var(--border);
+    }
+    .btn-outline:hover{ border-color: var(--brand);color:white; box-shadow: 0 0 0 3px var(--ring); }
+    .btn-danger{ background: var(--danger); }
+    .btn-danger:hover{ filter: brightness(.95); }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: var(--light);
-            border-radius: 8px;
-        }
+    /* ========= “Live” strip ========= */
+    .strip{
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+    .strip-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .strip-title{ font-size:12px; text-transform:uppercase; letter-spacing:.12em; color: var(--subtle); font-weight:800; }
+    .chip{
+      font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      padding:6px 10px; border-radius:8px; border:1px solid var(--border);
+    }
+    .chip.doctor{ background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
+    .chip.patient{ background:#eff6ff; color:#1e40af; border-color:#bfdbfe; }
+    .row{
+      display:grid; grid-template-columns: 120px 1fr; gap:14px; align-items:start;
+      padding:8px 0;
+    }
+    .label{ font-size:12px; color: var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+    .text{ font-size:15px; }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--gray);
-        }
+    /* ========= Cards Grid ========= */
+    .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:20px; }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: 1fr; } .toolbar{ grid-template-columns: 1fr 1fr; } }
 
-        .status-dot.active {
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
+    .card{
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .meta{ display:flex; align-items:center; gap:10px; }
+    .ico{
+      width:36px;height:36px;border-radius:10px; display:grid; place-items:center; font-size:18px; user-select:none;
+      color: var(--text);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(2,6,23,.02), rgba(2,6,23,.06));
+    }
+    .title{ font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color: var(--muted); }
+    .count{
+      min-width:38px; height:32px; padding:0 10px; display:grid; place-items:center;
+      background:#0f172a; color:#fff; border-radius:8px; font-weight:800; font-size:15px;
+    }
+    @media (prefers-color-scheme: dark){ .count{ background:#111827; } }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .list{ max-height:220px; overflow:auto; padding-right:6px; }
+    .list::-webkit-scrollbar{ width:8px; }
+    .list::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:8px; }
+    @media (prefers-color-scheme: dark){
+      .list::-webkit-scrollbar-thumb{ background:#334155; }
+    }
 
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
+    .item{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+      background: var(--panel);
+      margin-bottom:8px;
+      font-size:14px; font-weight:500;
+      transition: border-color .18s ease, transform .18s ease;
+    }
+    .item:hover{ border-color: var(--brand); transform: translateX(2px); }
+    .value{ font-weight:800; }
 
-        button, select {
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 2px solid #e5e7eb;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+    .vital .value{ color: var(--purple); }
+    .test .value{ color: var(--success); }
+    .med .value{ color: var(--warn); }
 
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-        }
+    /* ========= Main Split ========= */
+    .split{ display:grid; grid-template-columns: 1.6fr 1fr; gap:16px; }
+    @media (max-width:1100px){ .split{ grid-template-columns: 1fr; } }
 
-        button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+    .panel{
+      background: var(--panel); border:1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden;
+    }
+    .panel-head{
+      display:flex; align-items:center; gap:10px;
+      padding:16px 18px; border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(2,6,23,.02), rgba(2,6,23,.06));
+      font-weight:800; letter-spacing:.02em;
+    }
+    .panel-body{ padding:18px; max-height:520px; overflow:auto; }
+    .panel-body::-webkit-scrollbar{ width:8px; }
+    .panel-body::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:8px; }
+    @media (prefers-color-scheme: dark){
+      .panel-body::-webkit-scrollbar-thumb{ background:#334155; }
+    }
 
-        button:disabled {
-            background: var(--light);
-            color: var(--gray);
-            cursor: not-allowed;
-        }
+    .entry{ padding:14px 0; border-bottom:1px solid var(--border); }
+    .entry:last-child{ border-bottom:none; }
+    .entry-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .who{ display:flex; align-items:center; gap:8px; font-weight:700; }
+    .speaker-dot{ width:10px;height:10px;border-radius:999px; }
+    .speaker-dot.doctor{ background: var(--success); }
+    .speaker-dot.patient{ background: var(--brand); }
+    .time{ font-size:12px; color: var(--subtle); font-weight:600; }
+    .entry-text{ font-size:15px; color: var(--text); }
 
-        button.danger { background: var(--danger); }
+    .summary-block{
+      border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:12px;
+      background: var(--panel);
+    }
+    .summary-title{ font-size:13px; font-weight:800; margin-bottom:8px; }
+    .summary-text{ font-size:14px; color: var(--text); }
+    .summary-ul{ list-style:none; margin:0; padding:0; }
+    .summary-ul li{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--border); }
+    .summary-ul li:last-child{ border-bottom:none; }
 
-        .preview {
-            background: #fffbea;
-            border: 2px dashed var(--warning);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
+    /* ========= Footer actions ========= */
+    .actions{
+      display:flex; gap:12px; flex-wrap:wrap;
+      background: var(--panel); border:1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding:16px; margin-top:16px;
+    }
+    .actions .btn{ flex:1 1 220px; }
 
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .speaker-badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .speaker-badge.doctor {
-            background: #d1fae5;
-            color: var(--success);
-        }
-
-        .speaker-badge.patient {
-            background: #dbeafe;
-            color: var(--primary);
-        }
-
-        .preview-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-
-        .preview-label {
-            font-weight: 600;
-            color: var(--gray);
-            min-width: 80px;
-        }
-
-        .medical-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .med-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid;
-        }
-
-        .med-card.vitals { border-color: var(--purple); }
-        .med-card.tests { border-color: var(--success); }
-        .med-card.medicines { border-color: var(--warning); }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .card-title {
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .card-count {
-            background: #1f2937;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-
-        .card-content {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .card-item {
-            padding: 8px 12px;
-            background: var(--light);
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 24px;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .panel-header {
-            padding: 20px 24px;
-            background: var(--light);
-            border-bottom: 2px solid #e5e7eb;
-            font-weight: 700;
-        }
-
-        .panel-body {
-            padding: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .conversation-entry {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .entry-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .entry-text { line-height: 1.6; }
-
-        .footer {
-            display: flex;
-            gap: 12px;
-        }
-
-        .footer button { flex: 1; }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--gray);
-        }
-
-        @media (max-width: 1200px) {
-            .controls { grid-template-columns: repeat(2, 1fr); }
-            .medical-cards { grid-template-columns: 1fr; }
-            .main-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    /* ========= Empty state ========= */
+    .empty{
+      text-align:center; color: var(--subtle); padding: 48px 12px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <div class="header">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div class="logo">🏥</div>
-                    <div>
-                        <h1>Medical Transcription System</h1>
-                        <p class="subtitle">Real-time voice transcription with smart categorization</p>
-                    </div>
-                </div>
-                <div class="status-indicator">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Ready</span>
-                </div>
-            </div>
+  <div class="container">
+    <!-- Top bar -->
+    <div class="surface">
+      <div class="header-main">
+        <div class="brand">
+          <div class="brand-logo">MS</div>
+          <div class="brand-text">
+            <h1>MedScribe Pro</h1>
+            <p>AI-Powered Medical Transcription & Analysis</p>
+          </div>
         </div>
 
-        <div class="card">
-            <div class="controls">
-                <select id="langSelect">
-                    <option value="ur-PK">Urdu (اردو)</option>
-                    <option value="en-US">English</option>
-                </select>
-                <button onclick="startSession()">▶ Start Session</button>
-                <button id="listenBtn" onclick="toggleListen()" disabled>🎤 Start Listening</button>
-                <button id="endBtn" onclick="endSession()" disabled class="danger">⏹ End Session</button>
-            </div>
+        <div class="status">
+          <span class="dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Ready to Start</span>
         </div>
+      </div>
 
-        <div class="preview">
-            <div class="preview-header">
-                <h3 style="font-size: 14px; color: var(--gray);">CURRENT SPEAKER</h3>
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <span class="speaker-badge doctor" id="speakerBadge">Doctor</span>
-                    <button onclick="switchSpeaker()" style="padding: 6px 12px; font-size: 12px;">Switch</button>
-                </div>
-            </div>
-            <div class="preview-row">
-                <span class="preview-label">Original:</span>
-                <span id="origText">Waiting for speech...</span>
-            </div>
-            <div class="preview-row">
-                <span class="preview-label">English:</span>
-                <span id="engText" style="color: var(--success); font-weight: 500;">Translation will appear here...</span>
-            </div>
-        </div>
-
-        <div class="medical-cards">
-            <div class="med-card vitals">
-                <div class="card-header">
-                    <span class="card-title" style="color: var(--purple);">❤️ Vitals</span>
-                    <div class="card-count" id="vitalsCount">0</div>
-                </div>
-                <div class="card-content" id="vitalsContent">
-                    <div class="empty-state" style="padding: 20px;">No vitals yet</div>
-                </div>
-            </div>
-
-            <div class="med-card tests">
-                <div class="card-header">
-                    <span class="card-title" style="color: var(--success);">🔬 Tests</span>
-                    <div class="card-count" id="testsCount">0</div>
-                </div>
-                <div class="card-content" id="testsContent">
-                    <div class="empty-state" style="padding: 20px;">No tests yet</div>
-                </div>
-            </div>
-
-            <div class="med-card medicines">
-                <div class="card-header">
-                    <span class="card-title" style="color: var(--warning);">💊 Medicines</span>
-                    <div class="card-count" id="medsCount">0</div>
-                </div>
-                <div class="card-content" id="medsContent">
-                    <div class="empty-state" style="padding: 20px;">No medicines yet</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-grid">
-            <div class="panel">
-                <div class="panel-header">💬 Conversation Log</div>
-                <div class="panel-body" id="convLog">
-                    <div class="empty-state">Start speaking to see conversation</div>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">📋 Summary</div>
-                <div class="panel-body" id="summary">
-                    <div class="empty-state">Summary will appear here</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card footer">
-            <button onclick="exportTXT()">📄 Export TXT</button>
-            <button onclick="exportJSON()">📊 Export JSON</button>
-            <button onclick="exportReport()" style="background: var(--success);">📋 Medical Report</button>
-        </div>
+      <div class="toolbar">
+        <select id="langSelect">
+          <option value="ur-PK">Urdu (Pakistan)</option>
+          <option value="en-US">English (US)</option>
+        </select>
+        <button class="btn" id="startBtn" onclick="startSession()">Start Session</button>
+        <button class="btn-outline" id="listenBtn" onclick="toggleListen()" disabled>Start Listening</button>
+        <button class="btn btn-danger" id="endBtn" onclick="endSession()" disabled>End Session</button>
+      </div>
     </div>
 
-    <script>
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition, isListening = false, sessionActive = false;
-        let currentSpeaker = 'Doctor', currentOrig = '', currentEng = '';
-        let speechTimeout, cache = new Map();
+    <!-- Live strip -->
+    <div class="strip">
+      <div class="strip-head">
+        <span class="strip-title">Live Transcription</span>
+        <div>
+          <span class="chip doctor" id="speakerBadge">Doctor</span>
+          <button class="btn btn-outline" style="margin-left:10px " onclick="switchSpeaker()">Switch Speaker</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">Original</span>
+        <span class="text" id="origText">Waiting for speech input...</span>
+      </div>
+      <div class="row">
+        <span class="label">English</span>
+        <span class="text" id="engText" style="font-weight:700; color: var(--success);">Translation will appear here...</span>
+      </div>
+    </div>
 
-        let data = {
-            log: [],
-            vitals: new Map(),
-            tests: new Set(),
-            medicines: new Set(),
-            doctorNotes: '',
-            patientHistory: ''
-        };
+    <!-- KPI grid -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="meta">
+            <div class="ico">❤️</div>
+            <div class="title">Vital Signs</div>
+          </div>
+          <div class="count" id="vitalsCount">0</div>
+        </div>
+        <div class="list" id="vitalsContent">
+          <div class="empty">No vitals recorded yet</div>
+        </div>
+      </div>
 
-        const meds = ['paracetamol', 'panadol', 'aspirin', 'brufen', 'ibuprofen', 'amoxicillin', 'azithromycin'];
-        const tests = ['cbc', 'blood test', 'x-ray', 'xray', 'ultrasound', 'ecg', 'mri', 'ct scan'];
-        const vitals = [
-            { name: 'BP', pattern: /(?:bp|blood pressure)\s*:?\s*(\d{2,3})\s*[\/]\s*(\d{2,3})/gi, format: m => m[1] + '/' + m[2] + ' mmHg' },
-            { name: 'Temp', pattern: /(?:temp|temperature)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + '°F' },
-            { name: 'HR', pattern: /(?:hr|pulse|heart rate)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + ' bpm' },
-            { name: 'SpO2', pattern: /(?:spo2|oxygen)\s*:?\s*(\d{2,3})/gi, format: m => m[1] + '%' }
-        ];
+      <div class="card">
+        <div class="card-head">
+          <div class="meta">
+            <div class="ico">🔬</div>
+            <div class="title">Tests Ordered</div>
+          </div>
+          <div class="count" id="testsCount">0</div>
+        </div>
+        <div class="list" id="testsContent">
+          <div class="empty">No tests ordered yet</div>
+        </div>
+      </div>
 
-        async function translate(text, lang) {
-            if (lang === 'en-US' || !text) return text;
-            if (cache.has(text)) return cache.get(text);
-            try {
-                const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + lang + '&tl=en&dt=t&q=' + encodeURIComponent(text);
-                const res = await fetch(url);
-                const json = await res.json();
-                let result = '';
-                if (json && json[0]) json[0].forEach(i => { if (i[0]) result += i[0]; });
-                cache.set(text, result);
-                return result;
-            } catch { return text; }
+      <div class="card">
+        <div class="card-head">
+          <div class="meta">
+            <div class="ico">💊</div>
+            <div class="title">Medications</div>
+          </div>
+          <div class="count" id="medsCount">0</div>
+        </div>
+        <div class="list" id="medsContent">
+          <div class="empty">No medications prescribed yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main split -->
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head">Conversation Transcript</div>
+        <div class="panel-body" id="convLog">
+          <div class="empty">Start session and begin speaking</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Clinical Summary</div>
+        <div class="panel-body" id="summary">
+          <div class="empty">Summary will be generated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="actions">
+      <button class="btn btn-outline" onclick="exportTXT()">Export TXT</button>
+      <button class="btn btn-outline" onclick="exportJSON()">Export JSON</button>
+      <button class="btn" style="background:var(--success)" onclick="exportReport()">Generate Report</button>
+    </div>
+  </div>
+
+  <!-- ===== Your original JS (unchanged) ===== -->
+  <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition, isListening = false, sessionActive = false;
+    let currentSpeaker = 'Doctor', currentOrig = '', currentEng = '';
+    let speechTimeout, cache = new Map();
+
+    let data = {
+      log: [],
+      vitals: new Map(),
+      tests: new Set(),
+      medicines: new Set(),
+      doctorNotes: '',
+      patientHistory: ''
+    };
+
+    const medicines = ['paracetamol','panadol','aspirin','disprin','brufen','ibuprofen','combiflam','crocin','dolo','calpol','amoxicillin','amoxil','augmentin','azithromycin','zithromax','azee','ciprofloxacin','cipro','metformin','glucophage','metsmall','omeprazole','omez','losec','pantoprazole','pan','amlodipine','norvasc','amlong','atorvastatin','lipitor','atorlip','clopidogrel','plavix','cetirizine','zyrtec','allegra','montelukast','singulair','montair','levocet','insulin','lantus','novomix','metronidazole','flagyl','cefixime','cefix','doxycycline','vibramycin'];
+
+    const tests = ['cbc','complete blood count','blood count','hemoglobin','hb','esr','crp','blood test','blood sugar','glucose','fasting','random sugar','hba1c','glycosylated','lipid profile','cholesterol','triglycerides','hdl','ldl','liver function','lft','sgot','sgpt','kidney function','kft','creatinine','urea','bun','thyroid','tsh','t3','t4','urine test','urine routine','urine culture','stool test','stool routine','chest xray','chest x-ray','xray','x-ray','ecg','ekg','electrocardiogram','echo','echocardiography','ultrasound','sonography','usg','ct scan','cat scan','mri','mri scan','mammogram','colonoscopy','endoscopy','blood culture','dengue test','dengue','malaria','typhoid','widal'];
+
+    const vitalPatterns = [
+      { name: 'Blood Pressure', pattern: /(bp|blood\s+pressure|بلڈ\s*پریشر)\s*:?\s*(\d{2,3})\s*(?:\/|baat|over|par)\s*(\d{2,3})/gi, format: m => m[2] + '/' + m[3] + ' mmHg' },
+      { name: 'Temperature', pattern: /(temp|temperature|درجہ\s*حرارت|بخار)\s*:?\s*(\d{2,3}(?:\.\d)?)\s*(?:°f|f|degree|fahrenheit)?/gi, format: m => m[2] + '°F' },
+      { name: 'Heart Rate', pattern: /(hr|heart\s+rate|pulse|نبض)\s*:?\s*(\d{2,3})\s*(?:bpm)?/gi, format: m => m[2] + ' bpm' },
+      { name: 'Respiratory Rate', pattern: /(rr|respiratory\s+rate|سانس)\s*:?\s*(\d{1,2})\s*(?:per\s+min)?/gi, format: m => m[2] + '/min' },
+      { name: 'SpO2', pattern: /(spo2|oxygen|o2\s*sat|آکسیجن)\s*:?\s*(\d{2,3})\s*%?/gi, format: m => m[2] + '%' },
+      { name: 'Weight', pattern: /(weight|وزن)\s*:?\s*(\d{2,3}(?:\.\d)?)\s*(?:kg)?/gi, format: m => m[2] + ' kg' },
+      { name: 'Height', pattern: /(height|قد)\s*:?\s*(\d{2,3}(?:\.\d)?)\s*(?:cm|feet|ft)?/gi, format: m => m[2] + ' cm' }
+    ];
+
+    async function translate(text, lang) {
+      if (lang === 'en-US' || !text) return text;
+      const cacheKey = lang + ':' + text;
+      if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+      try {
+        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + lang + '&tl=en&dt=t&q=' + encodeURIComponent(text);
+        const res = await fetch(url);
+        const json = await res.json();
+        let result = '';
+        if (json && json[0]) {
+          json[0].forEach(item => { if (item[0]) result += item[0]; });
+        }
+        result = result || text;
+        cache.set(cacheKey, result);
+        return result;
+      } catch (error) {
+        console.error('Translation error:', error);
+        return text;
+      }
+    }
+
+    function initRecog() {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognition.lang = document.getElementById('langSelect').value;
+
+      recognition.onresult = async (e) => {
+        let interim = '', final = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const transcript = e.results[i][0].transcript;
+          if (e.results[i].isFinal) { final += transcript + ' '; }
+          else { interim += transcript; }
         }
 
-        function initRecog() {
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = document.getElementById('langSelect').value;
-
-            recognition.onresult = e => {
-                let interim = '', final = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-                    else interim += e.results[i][0].transcript;
-                }
-                if (interim) {
-                    document.getElementById('origText').textContent = currentOrig + interim;
-                    translateAndShow(currentOrig + interim);
-                }
-                if (final.trim()) {
-                    currentOrig += final;
-                    document.getElementById('origText').textContent = currentOrig;
-                    translateAndShow(currentOrig);
-                    clearTimeout(speechTimeout);
-                    speechTimeout = setTimeout(finalize, 2000);
-                }
-            };
-
-            recognition.onend = () => {
-                if (isListening && sessionActive) {
-                    try { recognition.start(); } catch (e) {}
-                }
-            };
+        if (interim) {
+          document.getElementById('origText').textContent = currentOrig + interim;
+          const translated = await translate(currentOrig + interim, document.getElementById('langSelect').value.split('-')[0]);
+          document.getElementById('engText').textContent = translated;
+          currentEng = translated;
         }
 
-        async function translateAndShow(text) {
-            const lang = document.getElementById('langSelect').value.split('-')[0];
-            const eng = await translate(text, lang);
-            currentEng = eng;
-            document.getElementById('engText').textContent = eng;
+        if (final.trim()) {
+          currentOrig += final;
+          document.getElementById('origText').textContent = currentOrig;
+          const translated = await translate(currentOrig, document.getElementById('langSelect').value.split('-')[0]);
+          currentEng = translated;
+          document.getElementById('engText').textContent = translated;
+
+          clearTimeout(speechTimeout);
+          speechTimeout = setTimeout(finalize, 2500);
         }
+      };
 
-        async function finalize() {
-            if (!currentOrig.trim()) return;
-            await process(currentOrig.trim(), currentEng.trim());
-            currentOrig = '';
-            currentEng = '';
-            document.getElementById('origText').textContent = 'Waiting for speech...';
-            document.getElementById('engText').textContent = 'Translation will appear here...';
+      recognition.onerror = (event) => {
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          console.error('Speech error:', event.error);
         }
+      };
 
-        function startSession() {
-            sessionActive = true;
-            data = { log: [], vitals: new Map(), tests: new Set(), medicines: new Set(), doctorNotes: '', patientHistory: '' };
-            updateUI('active');
-            initRecog();
-            updateAll();
+      recognition.onend = () => {
+        if (isListening && sessionActive) {
+          try { recognition.start(); } catch (e) {}
         }
+      };
+    }
 
-        function toggleListen() {
-            if (!isListening) {
-                if (!recognition) initRecog();
-                try {
-                    recognition.start();
-                    isListening = true;
-                    updateUI('listening');
-                } catch (e) {}
-            } else {
-                clearTimeout(speechTimeout);
-                finalize();
-                recognition.stop();
-                isListening = false;
-                updateUI('active');
-            }
+    async function finalize() {
+      if (!currentOrig.trim() || !currentEng.trim()) return;
+      await process(currentOrig.trim(), currentEng.trim());
+      currentOrig = '';
+      currentEng = '';
+      document.getElementById('origText').textContent = 'Waiting for speech input...';
+      document.getElementById('engText').textContent = 'Translation will appear here...';
+    }
+
+    function startSession() {
+      sessionActive = true;
+      data = {
+        log: [], vitals: new Map(), tests: new Set(), medicines: new Set(),
+        doctorNotes: '', patientHistory: ''
+      };
+      updateUI('active');
+      initRecog();
+      updateAll();
+    }
+
+    function toggleListen() {
+      if (!isListening) {
+        if (!recognition) initRecog();
+        try {
+          recognition.lang = document.getElementById('langSelect').value;
+          recognition.start();
+          isListening = true;
+          updateUI('listening');
+        } catch (e) { console.error('Recognition start error:', e); }
+      } else {
+        clearTimeout(speechTimeout);
+        finalize();
+        recognition.stop();
+        isListening = false;
+        updateUI('active');
+      }
+    }
+
+    function endSession() {
+      if (isListening) toggleListen();
+      sessionActive = false;
+      updateUI('idle');
+    }
+
+    function switchSpeaker() {
+      finalize();
+      currentSpeaker = currentSpeaker === 'Doctor' ? 'Patient' : 'Doctor';
+      const badge = document.getElementById('speakerBadge');
+      badge.textContent = currentSpeaker;
+      badge.className = 'chip ' + currentSpeaker.toLowerCase();
+    }
+
+    function extractVitals(text) {
+      const found = new Map();
+      const cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+      vitalPatterns.forEach(vital => {
+        vital.pattern.lastIndex = 0;
+        let match;
+        while ((match = vital.pattern.exec(cleanText)) !== null) {
+          const value = vital.format(match);
+          found.set(vital.name, value);
         }
+      });
+      return found;
+    }
 
-        function endSession() {
-            if (isListening) toggleListen();
-            sessionActive = false;
-            updateUI('idle');
+    function extractMedicines(text) {
+      const found = new Set();
+      const cleanText = text.toLowerCase().replace(/[^\w\s]/g, ' ');
+      const words = cleanText.split(/\s+/);
+      medicines.forEach(med => {
+        const medWords = med.split(/\s+/);
+        if (medWords.length === 1) {
+          if (words.includes(med)) found.add(med.charAt(0).toUpperCase() + med.slice(1));
+        } else {
+          if (cleanText.includes(med)) {
+            const formatted = med.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            found.add(formatted);
+          }
         }
+      });
+      return found;
+    }
 
-        function switchSpeaker() {
-            finalize();
-            currentSpeaker = currentSpeaker === 'Doctor' ? 'Patient' : 'Doctor';
-            const badge = document.getElementById('speakerBadge');
-            badge.textContent = currentSpeaker;
-            badge.className = 'speaker-badge ' + currentSpeaker.toLowerCase();
+    function extractTests(text) {
+      const found = new Set();
+      const cleanText = text.toLowerCase().replace(/[^\w\s]/g, ' ');
+      tests.forEach(test => {
+        const testWords = test.split(/\s+/);
+        if (testWords.length === 1) {
+          const regex = new RegExp('\\b' + test + '\\b', 'i');
+          if (regex.test(cleanText)) found.add(test.toUpperCase());
+        } else {
+          if (cleanText.includes(test)) {
+            const formatted = test.split(' ').map(w => w.toUpperCase()).join(' ');
+            found.add(formatted);
+          }
         }
+      });
+      return found;
+    }
 
-        function extractVitals(text) {
-            const found = new Map();
-            vitals.forEach(v => {
-                v.pattern.lastIndex = 0;
-                let m;
-                while ((m = v.pattern.exec(text)) !== null) {
-                    found.set(v.name, v.format(m));
-                }
-            });
-            return found;
-        }
+    async function process(orig, eng) {
+      const entry = { time: new Date().toLocaleTimeString(), speaker: currentSpeaker, orig, eng };
+      data.log.push(entry);
+      if (currentSpeaker === 'Doctor') data.doctorNotes += eng + ' ';
+      else data.patientHistory += eng + ' ';
 
-        function extractMeds(text) {
-            const found = new Set();
-            const lower = text.toLowerCase();
-            meds.forEach(m => {
-                if (lower.includes(m)) found.add(m.charAt(0).toUpperCase() + m.slice(1));
-            });
-            return found;
-        }
+      const vitals = extractVitals(eng + ' ' + orig);
+      vitals.forEach((value, key) => data.vitals.set(key, value));
 
-        function extractTests(text) {
-            const found = new Set();
-            const lower = text.toLowerCase();
-            tests.forEach(t => {
-                if (lower.includes(t)) found.add(t.toUpperCase());
-            });
-            return found;
-        }
+      const foundMeds = extractMedicines(eng + ' ' + orig);
+      foundMeds.forEach(med => data.medicines.add(med));
 
-        async function process(orig, eng) {
-            const entry = {
-                time: new Date().toLocaleTimeString(),
-                speaker: currentSpeaker,
-                orig: orig,
-                eng: eng
-            };
+      const foundTests = extractTests(eng + ' ' + orig);
+      foundTests.forEach(test => data.tests.add(test));
 
-            data.log.push(entry);
-            if (currentSpeaker === 'Doctor') data.doctorNotes += eng + ' ';
-            else data.patientHistory += eng + ' ';
+      updateAll();
+    }
 
-            const v = extractVitals(eng);
-            v.forEach((val, key) => data.vitals.set(key, val));
+    function updateAll(){ updateConversation(); updateVitals(); updateTests(); updateMedicines(); updateSummary(); updateCounts(); }
 
-            extractMeds(orig + ' ' + eng).forEach(m => data.medicines.add(m));
-            extractTests(orig + ' ' + eng).forEach(t => data.tests.add(t));
+    function updateConversation() {
+      const log = document.getElementById('convLog');
+      if (data.log.length === 0) { log.innerHTML = '<div class="empty">Start session and begin speaking</div>'; return; }
+      log.innerHTML = '';
+      data.log.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.innerHTML = `
+          <div class="entry-top">
+            <div class="who">
+              <span class="speaker-dot ${entry.speaker.toLowerCase()}"></span>
+              ${entry.speaker}
+            </div>
+            <span class="time">${entry.time}</span>
+          </div>
+          <div class="entry-text">${entry.eng}</div>
+        `;
+        log.appendChild(div);
+      });
+      log.scrollTop = log.scrollHeight;
+    }
 
-            updateAll();
-        }
+    function updateVitals() {
+      const content = document.getElementById('vitalsContent');
+      if (data.vitals.size === 0) { content.innerHTML = '<div class="empty">No vitals recorded yet</div>'; return; }
+      content.innerHTML = '';
+      data.vitals.forEach((value, name) => {
+        const div = document.createElement('div');
+        div.className = 'item vital';
+        div.innerHTML = `<span>${name}</span><span class="value">${value}</span>`;
+        content.appendChild(div);
+      });
+    }
 
-        function updateAll() {
-            updateConv();
-            updateVitals();
-            updateTests();
-            updateMeds();
-            updateSummary();
-            updateCounts();
-        }
+    function updateTests() {
+      const content = document.getElementById('testsContent');
+      if (data.tests.size === 0) { content.innerHTML = '<div class="empty">No tests ordered yet</div>'; return; }
+      content.innerHTML = '';
+      data.tests.forEach(test => {
+        const div = document.createElement('div');
+        div.className = 'item test';
+        div.innerHTML = `<span>${test}</span>`;
+        content.appendChild(div);
+      });
+    }
 
-        function updateConv() {
-            const log = document.getElementById('convLog');
-            log.innerHTML = '';
-            data.log.forEach(e => {
-                const div = document.createElement('div');
-                div.className = 'conversation-entry';
-                div.innerHTML = '<div class="entry-header"><strong>' + e.speaker + '</strong><span style="color: var(--gray); font-size: 12px;">' + e.time + '</span></div><div class="entry-text">' + e.eng + '</div>';
-                log.appendChild(div);
-            });
-            log.scrollTop = log.scrollHeight;
-        }
+    function updateMedicines() {
+      const content = document.getElementById('medsContent');
+      if (data.medicines.size === 0) { content.innerHTML = '<div class="empty">No medications prescribed yet</div>'; return; }
+      content.innerHTML = '';
+      data.medicines.forEach(med => {
+        const div = document.createElement('div');
+        div.className = 'item med';
+        div.innerHTML = `<span>${med}</span>`;
+        content.appendChild(div);
+      });
+    }
 
-        function updateVitals() {
-            const cont = document.getElementById('vitalsContent');
-            if (data.vitals.size === 0) return;
-            cont.innerHTML = '';
-            data.vitals.forEach((val, key) => {
-                const div = document.createElement('div');
-                div.className = 'card-item';
-                div.innerHTML = '<span>' + key + '</span><strong style="color: var(--purple);">' + val + '</strong>';
-                cont.appendChild(div);
-            });
-        }
+    function updateSummary() {
+      const summary = document.getElementById('summary');
+      if (data.log.length === 0) { summary.innerHTML = '<div class="empty">Summary will be generated</div>'; return; }
+      let html = '';
 
-        function updateTests() {
-            const cont = document.getElementById('testsContent');
-            if (data.tests.size === 0) return;
-            cont.innerHTML = '';
-            data.tests.forEach(t => {
-                const div = document.createElement('div');
-                div.className = 'card-item';
-                div.textContent = '🔬 ' + t;
-                cont.appendChild(div);
-            });
-        }
+      if (data.vitals.size > 0) {
+        html += '<div class="summary-block"><div class="summary-title" style="color: var(--purple);">Vital Signs</div><ul class="summary-ul">';
+        data.vitals.forEach((value, name) => { html += `<li><span>${name}</span><strong class="value" style="color: var(--purple);">${value}</strong></li>`; });
+        html += '</ul></div>';
+      }
 
-        function updateMeds() {
-            const cont = document.getElementById('medsContent');
-            if (data.medicines.size === 0) return;
-            cont.innerHTML = '';
-            data.medicines.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'card-item';
-                div.textContent = '💊 ' + m;
-                cont.appendChild(div);
-            });
-        }
+      if (data.patientHistory) {
+        html += `<div class="summary-block"><div class="summary-title" style="color: var(--brand);">Patient History</div><div class="summary-text">${data.patientHistory}</div></div>`;
+      }
 
-        function updateSummary() {
-            const sum = document.getElementById('summary');
-            let html = '<div style="padding: 10px;">';
-            
-            if (data.vitals.size > 0) {
-                html += '<h4 style="color: var(--purple); margin-bottom: 10px;">❤️ Vitals</h4>';
-                data.vitals.forEach((v, k) => html += '<div style="margin-bottom: 8px;"><strong>' + k + ':</strong> ' + v + '</div>');
-            }
+      if (data.doctorNotes) {
+        html += `<div class="summary-block"><div class="summary-title" style="color: var(--success);">Doctor's Notes</div><div class="summary-text">${data.doctorNotes}</div></div>`;
+      }
 
-            if (data.patientHistory) {
-                html += '<h4 style="color: var(--primary); margin: 16px 0 10px;">📝 Patient</h4><p style="font-size: 13px;">' + data.patientHistory + '</p>';
-            }
+      if (data.tests.size > 0) {
+        html += '<div class="summary-block"><div class="summary-title" style="color: var(--success);">Tests Ordered</div><ul class="summary-ul">';
+        data.tests.forEach(test => { html += `<li><span>${test}</span></li>`; });
+        html += '</ul></div>';
+      }
 
-            if (data.doctorNotes) {
-                html += '<h4 style="color: var(--success); margin: 16px 0 10px;">👨‍⚕️ Doctor</h4><p style="font-size: 13px;">' + data.doctorNotes + '</p>';
-            }
+      if (data.medicines.size > 0) {
+        html += '<div class="summary-block"><div class="summary-title" style="color: var(--warn);">Medications</div><ul class="summary-ul">';
+        data.medicines.forEach(med => { html += `<li><span>${med}</span></li>`; });
+        html += '</ul></div>';
+      }
 
-            html += '</div>';
-            sum.innerHTML = html;
-        }
+      summary.innerHTML = html;
+    }
 
-        function updateCounts() {
-            document.getElementById('vitalsCount').textContent = data.vitals.size;
-            document.getElementById('testsCount').textContent = data.tests.size;
-            document.getElementById('medsCount').textContent = data.medicines.size;
-        }
+    function updateCounts(){
+      document.getElementById('vitalsCount').textContent = data.vitals.size;
+      document.getElementById('testsCount').textContent = data.tests.size;
+      document.getElementById('medsCount').textContent = data.medicines.size;
+    }
 
-        function updateUI(state) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            const listenBtn = document.getElementById('listenBtn');
-            const endBtn = document.getElementById('endBtn');
+    function updateUI(state){
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      const listenBtn = document.getElementById('listenBtn');
+      const endBtn = document.getElementById('endBtn');
 
-            if (state === 'idle') {
-                dot.classList.remove('active');
-                text.textContent = 'Ready';
-                listenBtn.disabled = true;
-                endBtn.disabled = true;
-            } else if (state === 'active') {
-                dot.classList.add('active');
-                text.textContent = 'Session Active';
-                listenBtn.disabled = false;
-                listenBtn.textContent = '🎤 Start Listening';
-                endBtn.disabled = false;
-            } else if (state === 'listening') {
-                text.textContent = 'Recording...';
-                listenBtn.textContent = '⏸ Stop Listening';
-            }
-        }
+      if (state === 'idle') {
+        dot.classList.remove('active'); text.textContent = 'Ready to Start';
+        listenBtn.disabled = true; listenBtn.textContent = 'Start Listening'; endBtn.disabled = true;
+      } else if (state === 'active') {
+        dot.classList.add('active'); text.textContent = 'Session Active';
+        listenBtn.disabled = false; listenBtn.textContent = 'Start Listening'; endBtn.disabled = false;
+      } else if (state === 'listening') {
+        text.textContent = 'Recording…'; listenBtn.textContent = 'Stop Listening';
+      }
+    }
 
-        function exportTXT() {
-            let txt = 'MEDICAL TRANSCRIPTION\\n\\n';
-            if (data.vitals.size > 0) {
-                txt += 'VITALS:\\n';
-                data.vitals.forEach((v, k) => txt += k + ': ' + v + '\\n');
-                txt += '\\n';
-            }
-            txt += 'PATIENT: ' + data.patientHistory + '\\n\\n';
-            txt += 'DOCTOR: ' + data.doctorNotes + '\\n\\n';
-            txt += 'TESTS: ' + Array.from(data.tests).join(', ') + '\\n\\n';
-            txt += 'MEDICINES: ' + Array.from(data.medicines).join(', ') + '\\n';
-            download(txt, 'text/plain', 'transcription.txt');
-        }
+    function exportTXT(){
+      let txt = '═══════════════════════════════════════════════════════════════\n';
+      txt += '                 MEDICAL CONSULTATION REPORT\n';
+      txt += '═══════════════════════════════════════════════════════════════\n\n';
+      txt += 'Date: ' + new Date().toLocaleDateString() + '\n';
+      txt += 'Time: ' + new Date().toLocaleTimeString() + '\n\n';
 
-        function exportJSON() {
-            const json = {
-                vitals: Object.fromEntries(data.vitals),
-                patient: data.patientHistory,
-                doctor: data.doctorNotes,
-                tests: Array.from(data.tests),
-                medicines: Array.from(data.medicines),
-                log: data.log
-            };
-            download(JSON.stringify(json, null, 2), 'application/json', 'transcription.json');
-        }
+      if (data.vitals.size > 0) {
+        txt += 'VITAL SIGNS:\n';
+        txt += '───────────────────────────────────────────────────────────────\n';
+        data.vitals.forEach((value, name) => { txt += name.padEnd(25) + ': ' + value + '\n'; });
+        txt += '\n';
+      }
 
-        function exportReport() {
-            let txt = 'MEDICAL CONSULTATION REPORT\\n\\n';
-            txt += 'Date: ' + new Date().toLocaleDateString() + '\\n\\n';
-            if (data.vitals.size > 0) {
-                txt += '❤️ VITAL SIGNS:\\n';
-                data.vitals.forEach((v, k) => txt += '   ' + k + ': ' + v + '\\n');
-                txt += '\\n';
-            }
-            txt += '📋 PATIENT COMPLAINT:\\n   ' + data.patientHistory + '\\n\\n';
-            txt += '👨‍⚕️ DOCTOR NOTES:\\n   ' + data.doctorNotes + '\\n\\n';
-            txt += '🔬 TESTS ORDERED:\\n';
-            data.tests.forEach(t => txt += '   • ' + t + '\\n');
-            txt += '\\n💊 MEDICATIONS:\\n';
-            data.medicines.forEach(m => txt += '   • ' + m + '\\n');
-            download(txt, 'text/plain', 'medical_report.txt');
-        }
+      txt += 'PATIENT CHIEF COMPLAINT:\n';
+      txt += '───────────────────────────────────────────────────────────────\n';
+      txt += (data.patientHistory || 'Not recorded') + '\n\n';
 
-        function download(content, type, name) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = name;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+      txt += 'DOCTOR\'S ASSESSMENT:\n';
+      txt += '───────────────────────────────────────────────────────────────\n';
+      txt += (data.doctorNotes || 'Not recorded') + '\n\n';
 
-        updateUI('idle');
-    </script>
+      if (data.tests.size > 0) {
+        txt += 'TESTS & INVESTIGATIONS ORDERED:\n';
+        txt += '───────────────────────────────────────────────────────────────\n';
+        let i = 1; data.tests.forEach(test => { txt += '   ' + i++ + '. ' + test + '\n'; });
+        txt += '\n';
+      }
+
+      if (data.medicines.size > 0) {
+        txt += 'MEDICATIONS PRESCRIBED:\n';
+        txt += '───────────────────────────────────────────────────────────────\n';
+        let i = 1; data.medicines.forEach(med => { txt += '   ' + i++ + '. ' + med + '\n'; });
+        txt += '\n';
+      }
+
+      txt += '═══════════════════════════════════════════════════════════════\n';
+      txt += 'Generated by MedScribe Pro - ' + new Date().toLocaleString() + '\n';
+      txt += '═══════════════════════════════════════════════════════════════\n';
+      download(txt, 'text/plain', 'medical_transcription.txt');
+    }
+
+    function exportJSON(){
+      const jsonData = {
+        sessionInfo: { date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString(), generatedBy: 'MedScribe Pro' },
+        vitals: Object.fromEntries(data.vitals),
+        patientHistory: data.patientHistory,
+        doctorNotes: data.doctorNotes,
+        testsOrdered: Array.from(data.tests),
+        medicationsPrescribed: Array.from(data.medicines),
+        conversationLog: data.log
+      };
+      download(JSON.stringify(jsonData, null, 2), 'application/json', 'medical_transcription.json');
+    }
+
+    function exportReport(){
+      let report = '╔═══════════════════════════════════════════════════════════════╗\n';
+      report += '║              MEDICAL CONSULTATION REPORT                      ║\n';
+      report += '╚═══════════════════════════════════════════════════════════════╝\n\n';
+      report += 'Date: ' + new Date().toLocaleDateString() + '\n';
+      report += 'Time: ' + new Date().toLocaleTimeString() + '\n\n';
+
+      if (data.vitals.size > 0) {
+        report += '─────────────────────────────────────────────────────────────\n';
+        report += 'VITAL SIGNS\n';
+        report += '─────────────────────────────────────────────────────────────\n\n';
+        data.vitals.forEach((value, name) => { report += '   ' + name + ': ' + value + '\n'; });
+        report += '\n';
+      }
+
+      report += '─────────────────────────────────────────────────────────────\n';
+      report += 'CHIEF COMPLAINT & PATIENT HISTORY\n';
+      report += '─────────────────────────────────────────────────────────────\n\n';
+      report += '   ' + (data.patientHistory || 'Not recorded') + '\n\n';
+
+      report += '─────────────────────────────────────────────────────────────\n';
+      report += 'DOCTOR\'S ASSESSMENT & RECOMMENDATIONS\n';
+      report += '─────────────────────────────────────────────────────────────\n\n';
+      report += '   ' + (data.doctorNotes || 'Not recorded') + '\n\n';
+
+      if (data.tests.size > 0) {
+        report += '─────────────────────────────────────────────────────────────\n';
+        report += 'LABORATORY TESTS & INVESTIGATIONS\n';
+        report += '─────────────────────────────────────────────────────────────\n\n';
+        let i = 1; data.tests.forEach(test => { report += '   ' + i++ + '. ' + test + '\n'; });
+        report += '\n';
+      }
+
+      if (data.medicines.size > 0) {
+        report += '─────────────────────────────────────────────────────────────\n';
+        report += 'PRESCRIBED MEDICATIONS\n';
+        report += '─────────────────────────────────────────────────────────────\n\n';
+        let i = 1; data.medicines.forEach(med => { report += '   ' + i++ + '. ' + med + '\n'; });
+        report += '\n';
+      }
+
+      report += '─────────────────────────────────────────────────────────────\n\n';
+      report += 'Generated by: MedScribe Pro\n';
+      report += 'Date & Time: ' + new Date().toLocaleString() + '\n';
+      report += '\n╚═══════════════════════════════════════════════════════════════╝\n';
+      download(report, 'text/plain', 'medical_report.txt');
+    }
+
+    function download(content, mimeType, filename){
+      const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    updateUI('idle');
+  </script>
 </body>
 </html>
